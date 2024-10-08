@@ -15,7 +15,7 @@ from requests.utils import dict_from_cookiejar
 
 from tavern._core import exceptions
 from tavern._core.dict_util import check_expected_keys, deep_dict_merge, format_keys
-from tavern._core.extfunctions import update_from_ext
+from tavern._core.extfunctions import get_wrapped_create_function, update_from_ext
 from tavern._core.general import valid_http_methods
 from tavern._core.pytest.config import TestConfig
 from tavern._core.report import attach_yaml
@@ -156,7 +156,12 @@ def get_request_args(rspec: dict, test_block_config: TestConfig) -> dict:
     add_request_args(RestRequest.optional_in_file, True)
 
     if "auth" in fspec:
-        request_args["auth"] = tuple(fspec["auth"])
+        try:
+            func = get_wrapped_create_function(fspec['auth']['$ext'])
+        except(KeyError, TypeError, AttributeError) as e:
+            request_args["auth"] = tuple(fspec["auth"])
+        else:
+            request_args["auth"] = func()
 
     if "cert" in fspec:
         if isinstance(fspec["cert"], list):
