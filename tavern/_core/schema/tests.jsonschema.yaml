@@ -94,11 +94,13 @@ definitions:
 
       auth:
         description: Authorisation to use for request - a list containing username and password
-        type: array
-        minItems: 2
-        maxItems: 2
-        items:
-          type: string
+        oneOf:
+          - type: array
+            minItems: 2
+            maxItems: 2
+            items:
+              - type: string
+          - type: object
 
       verify:
         description: Whether to verify the server's certificates
